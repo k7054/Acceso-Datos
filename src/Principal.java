@@ -2,7 +2,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Scanner;
 
-public class Concordancia {
+public class Principal {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Introduce el nombre del fichero:");
