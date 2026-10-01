@@ -21,10 +21,6 @@ public class Usuarios {
         return listaAficiones;
     }
 
-    public boolean existeUsuario(String codigo) {
-        return codUsuarios.contains(codigo);
-    }
-
     public void anadirUsuario(String codigo, String aficiones) {
         codUsuarios.add(codigo);
         listaAficiones.add(aficiones);
@@ -49,19 +45,24 @@ public class Usuarios {
     }
 
     public List<String> obtenerConcordancias(int concordanciaMin) {
+        // Creo una lista para ir guardando los usuarios con concordancias
         List<String> concordancias = new ArrayList<>();
 
+        // Recorro el arraylist de codigo de usuarios, primer for para el primer usuario y el segundo for para el segundo usuario
         for (int i = 0; i < codUsuarios.size(); i++) {
             String user1 = codUsuarios.get(i);
+            // Separo la cadena de aficiones en un array
             String[] aficionesUser1 = listaAficiones.get(i).split(" ");
 
             for (int j = i + 1; j < codUsuarios.size(); j++) {
                 String user2 = codUsuarios.get(j);
+                // Convierto la cadena de aficiones del segundo usuario en una lista
                 List<String> aficionesUser2 = Arrays.asList(listaAficiones.get(j).split(" "));
 
                 int coincidencias = 0;
                 List<String> aficionesComunes = new ArrayList<>();
 
+                // Recorro cada aficion del primer usuario, y si no está vacía y el segundo usuario tambien la tiene la guardo
                 for (String aficion : aficionesUser1) {
                     if (!aficion.isEmpty() && aficionesUser2.contains(aficion)) {
                         coincidencias++;

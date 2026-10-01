@@ -46,7 +46,9 @@ public class Fichero {
                 // Si no está vacía, separo la linea en 2, por un lado el codigo de usuario y por otro lado la cadena de aficiones
                 if (!linea.isEmpty()) {
                     String[] partes = linea.split(" ", 2);
+                    // primera parte asigno codigo de usuario
                     String codigo = partes[0];
+                    // segunda parte asigno cadena de aficiones, en caso que no tenga aficiones asigno una cadena vacía
                     String aficiones = (partes.length > 1) ? partes[1] : "";
                     usuario.anadirUsuario(codigo, aficiones);
                 }
@@ -57,6 +59,7 @@ public class Fichero {
     }
 
     public static boolean guardarNuevoUsuario(File file, String codigo, String aficiones) {
+        // Abro el fichero con append en true para poder escribir sin borrar lo anterior
         try (FileWriter fileWriter = new FileWriter(file, true)) {
             fileWriter.write(codigo + " " + aficiones + "\n");
             return true;
@@ -66,6 +69,7 @@ public class Fichero {
         }
     }
 
+    // Escribo las concordancia que ha encontrado en un nuevo fichero
     public static boolean guardarConcordancias(String nombreFicheroSalida, List<String> lineasConcordancias) {
         File ficheroSalida = new File(nombreFicheroSalida);
         try (PrintWriter printWriter = new PrintWriter(new FileWriter(ficheroSalida))) {

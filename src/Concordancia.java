@@ -79,9 +79,11 @@ public class Concordancia {
                     }
                 }
 
+                // Comprobar si hay concordancias y generar el fichero
                 case 3 -> {
                     System.out.println("Fichero de concordancias:");
 
+                    // Compruebo que haya al menos 2 usuarios
                     if (usuarios.getCodUsuarios().size() < 2) {
                         System.out.println("Tiene que haber al menos 2 usuarios registrados.");
                         break;
@@ -89,6 +91,7 @@ public class Concordancia {
 
                     int concordanciaMin = 0;
 
+                    // Compruebo que el número de concordancias introducido sea válido
                     do {
                         System.out.println("Introduce el número mínimo de aficiones en común (mínimo 1):");
                         if (scanner.hasNextInt()) {
@@ -102,16 +105,18 @@ public class Concordancia {
                         }
                     } while (concordanciaMin < 1);
 
+                    // Voy guardando en una lista las concordancias
                     List<String> concordancias = usuarios.obtenerConcordancias(concordanciaMin);
                     String nombreFichSalida = "concordancias.txt";
 
+                    // Creo el fichero de concordancias
                     if (Fichero.guardarConcordancias(nombreFichSalida, concordancias)) {
                         System.out.println("Fichero generado");
                         System.out.println("Se han registrado " + concordancias.size() + " parejas con al menos " + concordanciaMin + " aficion/es en común");
                     }
                 }
 
-                case 4 -> System.out.println("Saliendo del programa.");
+                case 4 -> System.out.println("Saliendo del programa...");
 
                 default -> throw new IllegalStateException("Unexpected value, introduce un número entre 1 y 4: ");
             }
