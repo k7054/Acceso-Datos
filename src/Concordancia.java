@@ -1,9 +1,4 @@
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -15,61 +10,19 @@ public class Concordancia {
 
         String ruta = nombreFichero;
 
-        File file = new File(ruta);
-
-        // Comprobamos si el fichero existe
-        if (!file.exists()) {
-            System.out.println("Fichero no existe, se creará uno nuevo...");
-            try {
-                if (!file.createNewFile()) {
-                    System.out.println("No se pudo crear el fichero");
-                    return;
-                }
-            } catch (IOException e) {
-                System.out.println("Error al intentar crear el fichero: " + e.getMessage());
-                return;
-            }
-        } else { // Si ya existe pasamos a comprobar si es válido, si se puede leer y si el tamaño no supera los 10000 bytes
-            if (!file.isFile()) {
-                System.out.println("Fichero no válido");
-                return;
-            } else if (!file.canRead()) {
-                System.out.println("Este fichero no se puede leer");
-                return;
-            } else if (file.length() > 10000) {
-                System.out.println("Fichero demasiado grande");
-                return;
-            }
-        }
-
-        // Declaro 2 ArrayLists para ir separando cod de usuarios de las aficiones de cada uno
-        ArrayList<String> codUsuarios = new ArrayList<>();
-        ArrayList<String> ListaAficiones = new ArrayList<>();
-
-        // Leemos el fichero
-        try (Scanner leerFichero = new Scanner(file)) {
-            // Mientras que haya una siguiente linea en el fichero, vamos leyendo
-            while (leerFichero.hasNextLine()) {
-                String linea = leerFichero.nextLine().trim();
-
-                // Si no está vacía, separo la liena en 2, por un lado el codigo de usuario y por otro lado la cadena de aficiones
-                if (!linea.isEmpty()) {
-                    String[] partes = linea.split(" ", 2);
-                    codUsuarios.add(partes[0]);
-                    if (partes.length > 1) {
-                        ListaAficiones.add(partes[1]);
-                    } else {
-                        ListaAficiones.add("");
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error al leer el fichero" + e.getMessage());
+        // Validamos el fichero mediante la clase Fichero
+        File file = Fichero.validarFichero(ruta);
+        // Si el fichero no es válido termina el programa
+        if (file == null) {
             return;
         }
 
+        Usuarios usuarios = new Usuarios();
+        Fichero.cargarDatosUsuarios(file, usuarios);
+
         int opcion;
 
+        // Menu
         do {
             System.out.println("Menú principal:");
             System.out.println("  1. Añadir usuario");
@@ -77,61 +30,51 @@ public class Concordancia {
             System.out.println("  3. Generar fichero de concordancias");
             System.out.println("  4. Salir");
 
+            // Valido si la opcion introducida es correcta, en caso de que no vuelve al principio del bucle
             System.out.println("Seleccione una opción:");
-            opcion = scanner.nextInt();
-            scanner.nextLine();
+            if (scanner.hasNext()) {
+                opcion = scanner.nextInt();
+                scanner.nextLine();
+            } else {
+                System.out.println("Por favor, introduce un número entero válido:");
+                scanner.nextLine();
+                opcion = 0;
+                continue;
+            }
 
             switch (opcion) {
+
+                // Añadir un nuevo usuario
                 case 1 -> {
-                    // Sugerimos un código
-                    String codSugerido = "U100";
-
-
-                    // En caso de que no esté vacío el fichero, comprobamos cual es el codigo mas grande y asi calcular el siguiente
-                    if (!codUsuarios.isEmpty()) {
-                        int numMax = 0;
-                        for (String s : codUsuarios) {
-                            try {
-                                int num = Integer.parseInt(s.replaceAll("[^0-9]", ""));
-                                if (num > numMax) numMax = num;
-                            } catch (NumberFormatException e) {}
-                        }
-                        codSugerido = "U" + (numMax + 1);
-                    }
-
-                    System.out.println("Codigo de usuario sugerido automáticamente: " + codSugerido);
-                    String codUsuario = codSugerido;
+                    // Pedimos una sugerencia de código de usuario
+                    String codUsuario = usuarios.sugerirCodUsuario();
+                    System.out.println("Código sugerido automáticamente: " + codUsuario);
 
                     System.out.println("Introduce las aficiones separadas por espacios:");
-                    String aficion = scanner.nextLine().trim().toUpperCase();
+                    String aficiones = scanner.nextLine().trim().toUpperCase();
 
-                    if (aficion.isEmpty()) {
-                        System.out.println("No se puede introducir un usuario sin aficiones.");
+                    // Si no se ha introducido ninguna aficion vuelve al menu
+                    if (aficiones.isEmpty()) {
+                        System.out.println("No se puede introducir usuarios sin aficiones.");
                         break;
                     }
 
-                    codUsuarios.add(codUsuario);
-                    ListaAficiones.add(aficion);
-
-                    try (FileWriter fileWriter = new FileWriter(file, true)) {
-                        fileWriter.write(codUsuario + " " + aficion + "\n");
-                        System.out.println("Usuario " + codUsuario + " añadido.");
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+                    // Guardo el usuario introducido en el fichero
+                    if (Fichero.guardarNuevoUsuario(file, codUsuario, aficiones)) {
+                        usuarios.anadirUsuario(codUsuario, aficiones);
+                        System.out.println("Usuario " + codUsuario + " registrado.");
                     }
                 }
 
+                // Mostrar usuarios registrados
                 case 2 -> {
                     System.out.println("Usuarios registrados:");
 
-                    if (codUsuarios.isEmpty()) {
+                    if (usuarios.getCodUsuarios().isEmpty()) {
                         System.out.println("No hay usuarios registrados actualmente.");
                     } else {
-                        for (int i = 0; i < codUsuarios.size(); i++) {
-                            String codigo = codUsuarios.get(i);
-                            String aficiones = ListaAficiones.get(i);
-
-                            System.out.println(codigo + " " + aficiones);
+                        for (int i = 0; i < usuarios.getCodUsuarios().size(); i++) {
+                            System.out.println(usuarios.getCodUsuarios().get(i) + " " + usuarios.getListaAficiones().get(i));
                         }
                     }
                 }
@@ -139,12 +82,13 @@ public class Concordancia {
                 case 3 -> {
                     System.out.println("Fichero de concordancias:");
 
-                    if (codUsuarios.size() < 2) {
+                    if (usuarios.getCodUsuarios().size() < 2) {
                         System.out.println("Tiene que haber al menos 2 usuarios registrados.");
                         break;
                     }
 
                     int concordanciaMin = 0;
+
                     do {
                         System.out.println("Introduce el número mínimo de aficiones en común (mínimo 1):");
                         if (scanner.hasNextInt()) {
@@ -153,50 +97,21 @@ public class Concordancia {
 
                             if (concordanciaMin < 1) System.out.println("El número debe de ser mayor o igual que 1.");
                         } else {
-                            System.out.println("Por favor introduce un número entero válido.");
+                            System.out.println("Introduce un número entero válido.");
                             scanner.nextLine();
                         }
                     } while (concordanciaMin < 1);
 
+                    List<String> concordancias = usuarios.obtenerConcordancias(concordanciaMin);
                     String nombreFichSalida = "concordancias.txt";
 
-                    File ficheroSalida = new File(nombreFichSalida);
-
-                    try (PrintWriter printWriter = new PrintWriter(new FileWriter(ficheroSalida))) {
-                        int parejasEncontradas = 0;
-
-                        for (int i = 0; i < codUsuarios.size(); i++) {
-                            String user1 = codUsuarios.get(i);
-                            String[] aficionesUser1 = ListaAficiones.get(i).split(" ");
-                            for (int j = i + 1; j < codUsuarios.size(); j++) {
-                                String user2 = codUsuarios.get(j);
-                                List<String> aficionesUser2 = Arrays.asList(ListaAficiones.get(j).split(" "));
-
-                                int coincidencias = 0;
-                                List<String> aficionesComunes = new ArrayList<>();
-
-                                for (String aficion : aficionesUser1) {
-                                    if (!aficion.isEmpty() && aficionesUser2.contains(aficion)) {
-                                        coincidencias++;
-                                        aficionesComunes.add(aficion);
-                                    }
-                                }
-
-                                if (coincidencias >= concordanciaMin) {
-                                    printWriter.println(user1 + " " + user2 + " " + String.join(" ", aficionesComunes));
-                                    parejasEncontradas++;
-                                }
-                            }
-                        }
-
+                    if (Fichero.guardarConcordancias(nombreFichSalida, concordancias)) {
                         System.out.println("Fichero generado");
-                        System.out.println("Se han registrado " + parejasEncontradas + " parejas con al menos " + concordanciaMin + " aficion/es en común.");
-                    } catch (IOException e) {
-                        System.out.println("Error al escribir el fichero de concordancias" + e.getMessage());
+                        System.out.println("Se han registrado " + concordancias.size() + " parejas con al menos " + concordanciaMin + " aficion/es en común");
                     }
                 }
 
-                case 4 -> System.out.println("Saliendo de la aplicación.");
+                case 4 -> System.out.println("Saliendo del programa.");
 
                 default -> throw new IllegalStateException("Unexpected value, introduce un número entre 1 y 4: ");
             }
