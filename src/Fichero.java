@@ -73,6 +73,7 @@ public class Fichero {
     public static boolean guardarConcordancias(String nombreFicheroSalida, List<String> lineasConcordancias) {
         File ficheroSalida = new File(nombreFicheroSalida);
         try (PrintWriter printWriter = new PrintWriter(new FileWriter(ficheroSalida))) {
+            // Recorro toda la lista de concordancias y voy escribiendo cada una en una linea
             for (String linea : lineasConcordancias) {
                 printWriter.println(linea);
             }
