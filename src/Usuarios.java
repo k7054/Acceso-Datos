@@ -32,7 +32,7 @@ public class Usuarios {
             return "U100";
         }
 
-        // En caso de que no esté vacío el fichero, comprobamos cual es el codigo mas grande y asi calcular el siguiente
+        // En caso de que no esté vacío el fichero, comprobamos cual es el codigo mayor y asi calcular el siguiente
         int numMax = 0;
         for (String s : codUsuarios) {
             try {
