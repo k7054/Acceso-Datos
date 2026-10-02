@@ -8,7 +8,7 @@ public class Principal {
         System.out.println("Introduce el nombre del fichero:");
         String nombreFichero = scanner.nextLine();
 
-        String ruta = nombreFichero;
+        String ruta = nombreFichero + ".txt";
 
         // Validamos el fichero mediante la clase Fichero
         File file = Fichero.validarFichero(ruta);
